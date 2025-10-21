@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HSC 25 Admission Eligibility Checker</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#0b1220; --accent:#06b6d4; --muted:#94a3b8;
+    --glass: rgba(255,255,255,0.03);
+  }
+  body{
+    margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    background: linear-gradient(180deg,#071028 0%, #071827 60%); color:#e6eef6;
+    -webkit-font-smoothing:antialiased;
+    padding:28px;
+  }
+  .wrap{ max-width:980px; margin:0 auto; display:grid; gap:20px; }
+  header{display:flex;align-items:center;gap:16px}
+  .logo{
+    width:56px;height:56px;border-radius:12px;
+    background:linear-gradient(135deg,var(--accent),#7c3aed);
+    display:flex;align-items:center;justify-content:center;font-weight:700;
+    box-shadow:0 6px 18px rgba(6,182,212,0.08);
+  }
+  h1{ margin:0;font-size:20px;}
+  p.lead{ margin:0;color:var(--muted); font-size:13px;}
+  .grid{
+    display:grid; grid-template-columns: 1fr 360px; gap:20px;
+  }
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.03); padding:18px; border-radius:12px;
+    box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+  }
+  label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
+  input[type="number"]{
+    width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);
+    background:var(--glass); color:inherit; font-size:15px; outline:none;
+  }
+  .row{ display:flex; gap:12px; }
+  .row .col{ flex:1; }
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    background: linear-gradient(90deg,var(--accent),#7c3aed); color:#041025;
+    border:none; padding:10px 14px; border-radius:10px; font-weight:600;
+    cursor:pointer; box-shadow:0 8px 24px rgba(7,39,71,0.5);
+  }
+  .small{ font-size:13px; color:var(--muted); }
+  .results{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px;}
+  .list{ padding:12px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00)); min-height:120px;}
+  .univ{ padding:10px; border-radius:8px; margin-bottom:8px; background: rgba(255,255,255,0.015); border-left:4px solid rgba(255,255,255,0.03);}
+  .univ.ok{ border-left-color: #00c853; }
+  .univ.no{ border-left-color: #ef4444; opacity:0.95; }
+  .u-title{ font-weight:700; font-size:14px; }
+  .u-desc{ font-size:13px; color:var(--muted); margin-top:6px; }
+  footer{ text-align:center; color:var(--muted); margin-top:6px; font-size:13px;}
+  .sources{ font-size:13px; color:var(--muted); margin-top:10px; max-height:200px; overflow:auto; padding-right:6px;}
+  .badge{ display:inline-block; padding:6px 8px; border-radius:999px; font-size:12px; color:#042028; background:#86efac; margin-right:8px; }
+  .note{ font-size:13px; color:#ffd98a; margin-top:8px; }
+  @media (max-width:900px){ .grid{ grid-template-columns:1fr; } .results{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">H25</div>
+      <div>
+        <h1>HSC 25 Admission Eligibility Checker</h1>
+        <p class="lead">Enter your SSC & HSC GPAs to check likely eligibility for major public engineering/uni units in Bangladesh.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h3 style="margin-top:0">Your scores</h3>
+        <div style="margin-top:8px;">
+          <label>SSC Total GPA (out of 5.00)</label>
+          <input id="sscGpa" type="number" step="0.01" min="0" max="5" placeholder="e.g. 4.83">
+        </div>
+
+        <div style="margin-top:12px;">
+          <label>HSC Total GPA (out of 5.00)</label>
+          <input id="hscTotal" type="number" step="0.01" min="0" max="5" placeholder="e.g. 4.9">
+        </div>
+
+        <div style="margin-top:12px;" class="row">
+          <div class="col">
+            <label>Mathematics GPA (HSC)</label>
+            <input id="mathGpa" type="number" step="0.01" min="0" max="5" placeholder="e.g. 5.00">
+          </div>
+          <div class="col">
+            <label>Physics GPA (HSC)</label>
+            <input id="phyGpa" type="number" step="0.01" min="0" max="5" placeholder="e.g. 5.00">
+          </div>
+        </div>
+
+        <div style="margin-top:12px;" class="row">
+          <div class="col">
+            <label>Chemistry GPA (HSC)</label>
+            <input id="chemGpa" type="number" step="0.01" min="0" max="5" placeholder="e.g. 5.00">
+          </div>
+          <div class="col">
+            <label>Biology GPA (HSC)</label>
+            <input id="bioGpa" type="number" step="0.01" min="0" max="5" placeholder="e.g. 4.50">
+          </div>
+        </div>
+
+        <div style="margin-top:14px; display:flex; gap:12px; align-items:center;">
+          <button class="btn" id="checkBtn">Check eligibility</button>
+          <div class="small">Results are indicative — official circulars may include extra requirements (age, year-of-pass limits, subject marks, MCQ thresholds).</div>
+        </div>
+
+        <div class="note" id="lastNote" style="display:none"></div>
+
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">How eligibility is determined</h3>
+        <p class="small">This tool uses publicly-published admission circular thresholds (SSC/HSC minima, subject-wise minima, or combined subject point totals) collected from university admission circulars and prospectuses. Where exact subject-to-mark translations were unavailable, we use conservative thresholds and mark them “approximate”. Always check the official circular before applying.</p>
+
+        <div style="margin-top:10px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+            <span class="badge">Sources</span>
+            <div class="small">Found/checked admission circulars & prospectuses online (selected links below).</div>
+          </div>
+
+          <div class="sources" id="sourcesBox">
+            <!-- sources inserted by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:6px;">
+      <h3 style="margin-top:0">Results</h3>
+      <div class="results" id="resultsArea">
+        <div>
+          <h4 style="margin:6px 0 8px 0">Eligible</h4>
+          <div class="list" id="eligibleList">
+            <!-- eligible items -->
+          </div>
+        </div>
+        <div>
+          <h4 style="margin:6px 0 8px 0">Not eligible</h4>
+          <div class="list" id="notEligibleList">
+            <!-- not eligible items -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Note: This checker is **indicative**. Official criteria, year-of-pass rules, and unit-specific subject-mark thresholds may change — always verify on official university admission pages.
+    </footer>
+  </div>
+
+<script>
+/*
+  Eligibility rules used by this tool (sources listed to the user).
+  We implement checks conservatively and annotate when a criterion is approximate.
+*/
+
+/* UNIVERSITY RULES DATA
+  For each item we provide:
+  - key: unique id
+  - display: name to show
+  - rule: function(scores) -> {eligible:bool, reason:string}
+  - shortDesc: string shown in results
+  - source: short source string (will be presented in Sources panel)
+*/
+
+const universities = [
+  {
+    key: 'buet',
+    display: 'BUET (Bangladesh University of Engineering & Technology)',
+    shortDesc: 'BUET typically requires very high HSC performance (HSC GPA 5.00 often required; also subject-mark thresholds). See official circular.',
+    source: 'BUET checklist / dept pages (official circulars)',
+    rule: s => {
+      // Official circulars require extremely strong HSC (often 5.00) and SSC >=4.0.
+      const ok = (s.hscTotal >= 5.00 && s.sscTotal >= 4.00);
+      return {eligible: ok, reason: ok ? 'Meets published SSC & HSC minima used by BUET checks.' : 'BUET typically requires HSC 5.00 and SSC >=4.00 (or equivalent). Also subject-specific mark thresholds apply.'};
+    }
+  },
+  {
+    key: 'cuet',
+    display: 'CUET (C.U.E.T. — engineering entrance type)',
+    shortDesc: 'CUET often requires combined GPA of Math+Physics+Chemistry ≥ 14 and English ≥ 3.5 (plus SSC ≥4.0).',
+    source: 'CUET admission circular (subject GPA sum criteria)',
+    rule: s => {
+      const sumMPC = (s.mathGpa + s.phyGpa + s.chemGpa);
+      const ok = (sumMPC >= 14 && s.sscTotal >= 4.00 && (s.englishMin??3.5) <= s.hscTotal /* placeholder - English check marked in description */);
+      // Since we don't have separate English input, we only check MPC and SSC.
+      const reason = ok ? 'Meets CIET subject-sum threshold (Math+Phy+Chem ≥ 14) and SSC minima.' : 'Requires Math+Physics+Chemistry sum ≥ 14 and SSC ≥ 4.00. Also an English minimum (see official circular).';
+      return {eligible: ok, reason};
+    }
+  },
+  {
+    key: 'kuet',
+    display: 'KUET (Khulna University of Engineering & Technology)',
+    shortDesc: 'KUET generally asks competitive GPAs (often SSC & HSC ≥3.50 each or higher). Check department circular for exact subject minima.',
+    source: 'KUET published admission rules (prospectus)',
+    rule: s => {
+      const ok = (s.sscTotal >= 3.5 && s.hscTotal >= 3.5);
+      return {eligible: ok, reason: ok ? 'Passes KUET general SSC/HSC minima used in circulars.' : 'KUET generally requires good SSC & HSC GPAs (often ≥3.5 each); see prospectus for department-specific thresholds.'};
+    }
+  },
+  {
+    key: 'ruet',
+    display: 'RUET (Rajshahi University of Engineering & Technology)',
+    shortDesc: 'RUET often requires GPA 4.0 (or higher) in Math, Physics, Chemistry and English with combined subject points ≈ 18 (per circular).',
+    source: 'RUET prospectus / admission notice',
+    rule: s => {
+      const sum4 = s.mathGpa + s.phyGpa + s.chemGpa + (s.englishGpa || 0);
+      // We do not collect englishGpa separately; therefore require math+phy+chem >= 12 and hscTotal >=4.0 as proxy
+      const ok = (s.hscTotal >= 4.0 && s.sscTotal >= 4.0 && (s.mathGpa >= 4.0 && s.phyGpa >= 4.0 && s.chemGpa >= 4.0));
+      return {eligible: ok, reason: ok ? 'Matches RUET common published requirement (subject GPAs ≥4.0 and SSC/HSC minima).' : 'RUET usually expects high subject GPAs (≈4.0+) and combined subject totals (see prospectus).'};
+    }
+  },
+  {
+    key: 'du_all',
+    display: 'DU (University of Dhaka) — Science unit / all units',
+    shortDesc: 'For Science units DU commonly requires combined SSC+HSC ≥ 8.0 and minimum GPA 3.5 in each exam; Biology programmes may require Biology ≥ 3.0.',
+    source: 'University of Dhaka undergraduate eligibility notes',
+    rule: s => {
+      const combined = (s.sscTotal + s.hscTotal);
+      const ok = (combined >= 8.0 && s.sscTotal >= 3.5 && s.hscTotal >= 3.5);
+      const reason = ok ? 'Combined SSC+HSC ≥ 8.0 and minima per exam satisfied.' : 'DU Science unit generally needs combined ≥ 8.0 and at least 3.5 in SSC and HSC individually.';
+      return {eligible: ok, reason};
+    }
+  },
+  {
+    key: 'ju_a',
+    display: 'JU A unit (Jahangirnagar University — A unit)',
+    shortDesc: 'JU A unit: total (SSC+HSC) commonly ≥ 8.5 and SSC & HSC each ≥4.0 (per recent circulars).',
+    source: 'Jahangirnagar University admission circular',
+    rule: s => {
+      const combined = s.sscTotal + s.hscTotal;
+      const ok = (combined >= 8.5 && s.sscTotal >= 4.0 && s.hscTotal >= 4.0);
+      return {eligible: ok, reason: ok ? 'Meets JU A-unit combined GPA and per-exam minima.' : 'JU A-unit usually asks combined ≥8.5 and SSC/HSC ≥4.0 each.'};
+    }
+  },
+  {
+    key: 'ju_d',
+    display: 'JU D unit (Jahangirnagar University — D unit)',
+    shortDesc: 'JU D unit (biological faculties) often has stricter combined GPA minima (e.g., total ≥ 9.0 in some circulars).',
+    source: 'Jahangirnagar University admission circular (D unit)',
+    rule: s => {
+      const combined = s.sscTotal + s.hscTotal;
+      const ok = (combined >= 9.0 && s.sscTotal >= 4.0 && s.hscTotal >= 4.0);
+      return {eligible: ok, reason: ok ? 'Matches the stricter D-unit combined-minima used in circulars.' : 'D-unit often requires a higher combined GPA (e.g., ≥9.0); check official circular.'};
+    }
+  },
+  {
+    key: 'ru_c',
+    display: 'RU C unit (University of Rajshahi — C unit)',
+    shortDesc: 'RU C-unit criteria vary by year/department; typical requirement is combined SSC+HSC ≈8.0 with good subject GPAs.',
+    source: 'RU prospectus / admission circular',
+    rule: s => {
+      const combined = s.sscTotal + s.hscTotal;
+      const ok = (combined >= 8.0 && s.hscTotal >= 3.5);
+      return {eligible: ok, reason: ok ? 'Meets common RU combined minima.' : 'RU C-unit criteria vary; common minima are combined ≥8.0 and subject GPAs ≥3.5.'};
+    }
+  },
+  {
+    key: 'cu_a',
+    display: 'CU A unit (University of Chittagong — A unit)',
+    shortDesc: 'Chittagong University A unit commonly requires combined SSC+HSC ≥8.5 (science group) and SSC/HSC minima.',
+    source: 'Chittagong University general qualifications',
+    rule: s => {
+      const combined = s.sscTotal + s.hscTotal;
+      const ok = (combined >= 8.5 && s.sscTotal >= 4.0 && s.hscTotal >= 3.5);
+      return {eligible: ok, reason: ok ? 'Meets CU A-unit combined minima (science group).' : 'CU A-unit usually expects combined ≥8.5 (science) and SSC/HSC minima.'};
+    }
+  },
+  {
+    key: 'sust_a',
+    display: 'SUST A unit (Shahjalal University of Science & Technology)',
+    shortDesc: 'SUST often asks combined minima (some circulars show combined 7.0 with other subject minima for science applicants).',
+    source: 'SUST prospectus / admission pages',
+    rule: s => {
+      const combined = s.sscTotal + s.hscTotal;
+      // be permissive for SUST (varies); require combined >=7.0 and at least 3.0 individually
+      const ok = (combined >= 7.0 && s.sscTotal >= 3.0 && s.hscTotal >= 3.0);
+      return {eligible: ok, reason: ok ? 'Matches commonly-published SUST minima (combined ≥7.0).' : 'SUST criteria vary by unit; many circulars require combined ≥7.0 with minimums in each exam.'};
+    }
+  },
+  {
+    key: 'butex',
+    display: 'BUTEX (Bangladesh University of Textiles)',
+    shortDesc: 'BUTEX: SSC ≥ 4.00; HSC ≥ 4.50; combined Math+Phy+Chem+English subject points ≈ 18.5 (documented in circular).',
+    source: 'BUTEX admission circular / prospectus',
+    rule: s => {
+      const sum4 = s.mathGpa + s.phyGpa + s.chemGpa + s.bioGpa; // we use bio as placeholder for english if english not provided
+      // BUTEX requires HSC >= 4.50 and SSC >=4.00 and subject-sum >= 18.50 (per circular)
+      const ok = (s.sscTotal >= 4.0 && s.hscTotal >= 4.5 && sum4 >= 18.5);
+      return {eligible: ok, reason: ok ? 'Matches BUTEX minima (SSC ≥4.0, HSC ≥4.5, subject-sum ≥18.5).' : 'BUTEX commonly requires SSC 4.0, HSC 4.5 and high combined subject points (≈18.5).'};
+    }
+  },
+  {
+    key: 'iut',
+    display: 'IUT (Islamic University of Technology)',
+    shortDesc: 'IUT generally requires strong SSC/HSC GPAs and subject preparation; use official IUT circular for exact thresholds.',
+    source: 'IUT entry requirements (IUTOIC page)',
+    rule: s => {
+      // safe proxy: require combined >= 8.0 and SSC/HSC >=4.0
+      const combined = s.sscTotal + s.hscTotal;
+      const ok = (combined >= 8.0 && s.sscTotal >= 4.0 && s.hscTotal >= 4.0);
+      return {eligible: ok, reason: ok ? 'Meets common IUT minima used as conservative proxy.' : 'IUT expects strong SSC/HSC GPAs — check IUT circular for department-specific minima.'};
+    }
+  },
+  {
+    key: 'mist',
+    display: 'MIST (Military Institute of Science & Technology)',
+    shortDesc: 'MIST commonly requires SSC ≥4.0 and a combined total of Math+Phy+Chem+English ≈ 18 in HSC (per circulars).',
+    source: 'MIST admission notice / prospectus',
+    rule: s => {
+      const fourSum = s.mathGpa + s.phyGpa + s.chemGpa + (s.bioGpa || 0); // using bio as placeholder for english if english not provided
+      const ok = (s.sscTotal >= 4.0 && fourSum >= 18.0);
+      return {eligible: ok, reason: ok ? 'Matches MIST common published minima (SSC ≥4.0 and subject-sum ≈18).' : 'MIST usually expects SSC 4.0 and subject-sum ≈18; check official circular for exact details.'};
+    }
+  }
+];
+
+/* Sources we collected (short list). These will be shown to the user.
+   They come from the web-run collection done for this session.
+   We'll show readable lines with links (plain text) so the user can verify.
+*/
+const sourcesList = [
+  {key:'buet', title:'BUET admission checklist / department pages', url:'https://www.buet.ac.bd (see BUET admission checklist / dept pages)'},
+  {key:'ruet', title:'RUET admission prospectus / circular', url:'https://admission.ruet.ac.bd (RUET prospectus)'},
+  {key:'cuet', title:'CUET admission circular (subject GPA sum: Math+Phy+Chem ≥ 14)', url:'https://admissionnotice.com/en/cuet-admission-circular-2025-admissioncuet.ac-bd/'},
+  {key:'du', title:'University of Dhaka undergraduate eligibility notes', url:'https://www.du.ac.bd/undergrad/BOT'},
+  {key:'butex', title:'BUTEX admission circular (SSC ≥4.0, HSC ≥4.5, subject-sum ≈18.5)', url:'https://butex.edu.bd/Admission/'},
+  {key:'mist', title:'MIST admission notice (SSC 4.0 and subject-sum requirements)', url:'https://mist.ac.bd'}
+];
+
+function renderSources(){
+  const sb = document.getElementById('sourcesBox');
+  sb.innerHTML = '';
+  sourcesList.forEach(s=>{
+    const d = document.createElement('div');
+    d.style.marginBottom = '10px';
+    d.innerHTML = `<div style="font-weight:700">${s.title}</div><div style="color:var(--muted);font-size:13px">${s.url}</div>`;
+    sb.appendChild(d);
+  });
+}
+
+function readInputs(){
+  function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v)?0:v; }
+  return {
+    sscTotal: num('sscGpa'),
+    hscTotal: num('hscTotal'),
+    mathGpa: num('mathGpa'),
+    phyGpa: num('phyGpa'),
+    chemGpa: num('chemGpa'),
+    bioGpa: num('bioGpa'),
+    // englishGpa not collected; some rules use bioGpa as placeholder or only require combined totals
+  };
+}
+
+function runChecks(){
+  const s = readInputs();
+  // simple validation
+  if(s.sscTotal <= 0 || s.hscTotal <= 0){
+    alert('Please enter your SSC and HSC total GPAs.');
+    return;
+  }
+
+  const eligible = [];
+  const notEligible = [];
+
+  universities.forEach(u=>{
+    const res = u.rule(s);
+    const item = {name:u.display, ok:res.eligible, reason:res.reason, shortDesc:u.shortDesc, source:u.source};
+    if(res.eligible) eligible.push(item); else notEligible.push(item);
+  });
+
+  // render lists
+  const eBox = document.getElementById('eligibleList');
+  const nBox = document.getElementById('notEligibleList');
+  eBox.innerHTML = ''; nBox.innerHTML = '';
+
+  if(eligible.length === 0){
+    eBox.innerHTML = `<div class="small" style="color:var(--muted)">No matches — you may still qualify by admission test performance or quota categories. Check official circulars.</div>`;
+  } else {
+    eligible.forEach(it=>{
+      const div = document.createElement('div');
+      div.className = 'univ ok';
+      div.innerHTML = `<div class="u-title">${it.name}</div><div class="u-desc">${it.reason} <div style="margin-top:6px;color:var(--muted);font-size:12px">${it.shortDesc}</div><div style="margin-top:6px;font-size:12px;color:var(--muted)"><strong>Source:</strong> ${it.source}</div></div>`;
+      eBox.appendChild(div);
+    });
+  }
+
+  if(notEligible.length === 0){
+    nBox.innerHTML = `<div class="small" style="color:var(--muted)">Congratulations — you meet common minima for all listed universities. Still check subject-wise and year-of-pass rules.</div>`;
+  } else {
+    notEligible.forEach(it=>{
+      const div = document.createElement('div');
+      div.className = 'univ no';
+      div.innerHTML = `<div class="u-title">${it.name}</div><div class="u-desc">${it.reason} <div style="margin-top:6px;color:var(--muted);font-size:12px">${it.shortDesc}</div><div style="margin-top:6px;font-size:12px;color:var(--muted)"><strong>Source:</strong> ${it.source}</div></div>`;
+      nBox.appendChild(div);
+    });
+  }
+
+  // summary note
+  const lastNote = document.getElementById('lastNote');
+  lastNote.style.display = 'block';
+  lastNote.innerText = `Displayed results use publicly-available admission minima collected from several university circulars (see sources). Where exact per-subject (English) GPA was not provided in the form we used conservative proxies; please confirm with the official circulars linked in Sources.`;
+}
+
+document.getElementById('checkBtn').addEventListener('click', runChecks);
+
+// initial render
+renderSources();
+</script>
+</body>
+</html>

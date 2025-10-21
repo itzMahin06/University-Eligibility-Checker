@@ -64,7 +64,7 @@
 <body>
   <div class="wrap">
     <header>
-      <div class="logo">H25</div>
+      <div class="logo">BUET Crackers</div>
       <div>
         <h1>HSC 25 Admission Eligibility Checker</h1>
         <p class="lead">Enter your SSC & HSC GPAs (including subject-wise) to check likely eligibility for major engineering and university units in Bangladesh.</p>
@@ -115,7 +115,7 @@
 
         <div style="margin-top:14px; display:flex; gap:12px; align-items:center;">
           <button class="btn" id="checkBtn">Check eligibility</button>
-          <div class="small">Results are indicative — check the official circulars too.</div>
+          <div class="small">Results are indicative — check official circulars too.</div>
         </div>
 
         <div class="note" id="lastNote" style="display:none"></div>
@@ -124,7 +124,7 @@
 
       <div class="card">
         <h3 style="margin-top:0">How eligibility is determined</h3>
-        <p class="small">This tool uses publicly-published admission circular minima. Where subject-wise GPAs or exact marks were not fully published, we use conservative proxies. Some universities include strict subject-wise GPA minima (e.g., Maths, Physics, Chemistry, English) and we account for that when documented.</p>
+        <p class="small">This tool uses publicly-published admission circular minima. Where subject-wise GPAs or exact marks were not fully published, we use conservative proxies. Some universities include strict subject‐wise GPA minima (e.g., Maths, Physics, Chemistry, English) and we now include that where documented.</p>
 
         <div style="margin-top:10px;">
           <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
@@ -155,202 +155,174 @@
     </div>
 
     <footer>
+    <a href="maahin.my.id"> ©Mahin — maahin.my.id </a> 
       Note: This checker is **indicative**. Official circulars, subject marks, year-of-pass limits, and quotas may change — always verify with official admission notices.
     </footer>
   </div>
 
 <script>
-// UNIVERSITY RULES DATA (updated with English and stricter subject-minima for BUET)
+// UNIVERSITY RULES DATA (updated with stricter requirements for some universities)
 const universities = [
   {
     key: 'buet',
     display: 'BUET (Bangladesh University of Engineering & Technology)',
-    shortDesc: 'BUET requires HSC Maths, Physics & Chemistry each GPA 5.00 and strong SSC/HSC totals.',
-    source: 'BUET checklist & admission guide (subject-wise minima) — see public guide article',
+    shortDesc: 'BUET requires HSC Maths, Physics & Chemistry each GPA 5.00 and HSC total GPA 5.00. SSC ≥4.00. (Based on public guide)’.',
+    source: 'BUET admission guideline article – subject-wise GPA 5.00 in HSC & total GPA 5.00. See careerpaths.com.bd guide. :contentReference[oaicite:2]{index=2}',
     rule: s => {
       const subjectStrict = (s.mathGpa >= 5.00 && s.phyGpa >= 5.00 && s.chemGpa >= 5.00);
-      const ok = subjectStrict && (s.sscTotal >= 4.00) && (s.hscTotal >= 5.00);
+      const ok = subjectStrict && (s.hscTotal >= 5.00) && (s.sscGpa >= 4.00 ?? true);
       const reason = ok
-        ? 'Meets the subject-wise minima (Math/Physics/Chemistry = 5.00) plus SSC ≥4.00 and HSC Total ≥5.00.'
-        : 'BUET typically requires HSC Maths, Physics, Chemistry each GPA 5.00, plus SSC ≥4.00 and HSC Total ≥5.00. Subject-wise minima not satisfied.';
+        ? 'Meets BUET’s strict subject-wise minima (Math/Physics/Chemistry = 5.00 each) & HSC total ≥5.00.'
+        : 'BUET typically requires HSC Maths, Physics, Chemistry each GPA 5.00 and HSC total ≥5.00. One or more condition not met.';
       return {eligible: ok, reason};
     }
   },
   {
     key: 'cuet',
     display: 'CUET (Engineering Entrance)',
-    shortDesc: 'Requirements include Math+Physics+Chemistry sum ≥14 (GPA) plus SSC ≥4.0; English minimum often mentioned.',
-    source: 'CUET admission circular (subject GPA sum criteria)',
+    shortDesc: 'Requires Math+Physics+Chemistry sum ≥14 (GPA) plus English GPA ≥3.50 and SSC ≥4.00.',
+    source: 'CUET admission prospectus (Math+Phy+Chem sum ≥14)’. :contentReference[oaicite:3]{index=3}',
     rule: s => {
       const sumMPC = (s.mathGpa + s.phyGpa + s.chemGpa);
-      const ok = (sumMPC >= 14 && s.sscTotal >= 4.00 && s.engGpa >= 3.50);
+      const ok = (sumMPC >= 14 && s.engGpa >= 3.50 && s.sscGpa >= 4.00 ?? true);
       const reason = ok
-        ? 'Meets Math+Physics+Chemistry sum ≥14, SSC ≥4.00 and English GPA ≥3.50.'
-        : 'Needs Math+Physics+Chemistry sum ≥14, SSC ≥4.00 and English GPA ≥3.50 (per circular).';
+        ? 'Meets Math+Physics+Chemistry sum ≥14, English GPA ≥3.50 and SSC ≥4.00.'
+        : 'CUET needs Math+Physics+Chemistry sum ≥14, English GPA ≥3.50 and SSC ≥4.00 (approx.).';
       return {eligible: ok, reason};
     }
   },
   {
     key: 'kuet',
     display: 'KUET (Khulna University of Engineering & Technology)',
-    shortDesc: 'KUET needs good SSC & HSC GPAs (commonly ≥3.50 each) and competitive subject GPA’s.',
-    source: 'KUET admission rules (prospectus)',
+    shortDesc: 'Expect very high HSC GPA (often 5.00) though official subject-wise not clearly published. We here require HSC total ≥5.00 as proxy.',
+    source: 'General admission guide (no explicit subject-wise 5.00 published).',
     rule: s => {
-      const ok = (s.sscTotal >= 3.50 && s.hscTotal >= 3.50 && s.mathGpa >= 3.00);
+      const ok = (s.hscTotal >= 5.00 && s.sscGpa >= 4.00 ?? true);
       const reason = ok
-        ? 'Meets KUET general SSC/HSC minima and math subject GPA.'
-        : 'KUET generally expects SSC & HSC each ≥3.50 and Maths GPA ≥3.00 (approximate).';
+        ? 'Meets HSC total ≥5.00 (proxy for KUET requirement).'
+        : 'KUET likely expects HSC total GPA 5.00 (science group) or equivalent; check circular.';
       return {eligible: ok, reason};
     }
   },
   {
     key: 'ruet',
     display: 'RUET (Rajshahi University of Engineering & Technology)',
-    shortDesc: 'RUET normally expects subject GPAs of ~4.0 or more in Maths/Physics/Chemistry plus SSC/HSC minima.',
-    source: 'RUET prospectus / admission notice',
+    shortDesc: 'Requires minimum GPA 4.00 in each of Maths/Physics/Chemistry/English and combined ~18.00 in those subjects; does *not* explicitly require HSC total GPA 5.0 in source.',
+    source: 'RUET prospectus – individual subject ≥4.00 & combined ≥18.00. :contentReference[oaicite:4]{index=4}',
     rule: s => {
-      const ok = (s.hscTotal >= 4.0 && s.sscTotal >= 4.0 && s.mathGpa >= 4.0 && s.phyGpa >= 4.0 && s.chemGpa >= 4.0);
+      const ok = (s.mathGpa >= 4.00 && s.phyGpa >= 4.00 && s.chemGpa >= 4.00 && s.engGpa >= 4.00 && (s.mathGpa+s.phyGpa+s.chemGpa+s.engGpa) >= 18.00);
       const reason = ok
-        ? 'Meets common RUET published requirement: subject GPAs ≥4.0 and SSC/HSC minima.'
-        : 'RUET generally expects subject GPAs (Math/Physics/Chemistry) ≥4.0 and SSC/HSC ≥4.0. Department-specific may differ.';
-      return {eligible: ok, reason};
-    }
-  },
-  {
-    key: 'du_all',
-    display: 'DU (University of Dhaka) — Science unit / all units',
-    shortDesc: 'DU Science unit: combined SSC+HSC ≥8.0 and SSC/HSC each ≥3.5; subject minima may apply.',
-    source: 'University of Dhaka undergraduate eligibility notes',
-    rule: s => {
-      const combined = s.sscTotal + s.hscTotal;
-      const ok = (combined >= 8.0 && s.sscTotal >= 3.5 && s.hscTotal >= 3.5);
-      const reason = ok
-        ? 'Combined SSC+HSC ≥8.0 and SSC/HSC each ≥3.5.'
-        : 'DU Science unit generally needs combined ≥8.0 and at least 3.5 in SSC & HSC each. Subject-wise minima may also apply.';
-      return {eligible: ok, reason};
-    }
-  },
-  {
-    key: 'ju_a',
-    display: 'JU A unit (Jahangirnagar University)',
-    shortDesc: 'JU A unit commonly needs combined SSC+HSC ≥8.5 and SSC/HSC each ≥4.0.',
-    source: 'Jahangirnagar University admission circular (A-unit)',
-    rule: s => {
-      const combined = s.sscTotal + s.hscTotal;
-      const ok = (combined >= 8.5 && s.sscTotal >= 4.0 && s.hscTotal >= 4.0);
-      const reason = ok
-        ? 'Meets JU A-unit combined GPA and per-exam minima.'
-        : 'JU A-unit normally expects combined ≥8.5 and SSC/HSC each ≥4.0.';
-      return {eligible: ok, reason};
-    }
-  },
-  {
-    key: 'ju_d',
-    display: 'JU D unit (Jahangirnagar University)',
-    shortDesc: 'JU D unit (Bio-faculties) often requires combined SSC+HSC ≥9.0 and SSC/HSC each ≥4.0.',
-    source: 'Jahangirnagar University admission circular (D-unit)',
-    rule: s => {
-      const combined = s.sscTotal + s.hscTotal;
-      const ok = (combined >= 9.0 && s.sscTotal >= 4.0 && s.hscTotal >= 4.0);
-      const reason = ok
-        ? 'Meets JU D-unit combined GPA and per-exam minima.'
-        : 'JU D-unit often needs combined ≥9.0 and SSC/HSC each ≥4.0.';
-      return {eligible: ok, reason};
-    }
-  },
-  {
-    key: 'ru_c',
-    display: 'RU C unit (University of Rajshahi)',
-    shortDesc: 'RU C-unit: combined SSC+HSC ≈8.0 and HSC minima ≥3.5 (varies by dept).',
-    source: 'RU admission prospectus',
-    rule: s => {
-      const combined = s.sscTotal + s.hscTotal;
-      const ok = (combined >= 8.0 && s.hscTotal >= 3.5);
-      const reason = ok
-        ? 'Meets typical RU C-unit combined minima.'
-        : 'RU C-unit criteria vary; commonly combined ≥8.0 and HSC ≥3.5.';
-      return {eligible: ok, reason};
-    }
-  },
-  {
-    key: 'cu_a',
-    display: 'CU A unit (University of Chittagong)',
-    shortDesc: 'CU A unit (Science) often requires combined SSC+HSC ≥8.5 and SSC/HSC minima.',
-    source: 'Chittagong University admission guidelines',
-    rule: s => {
-      const combined = s.sscTotal + s.hscTotal;
-      const ok = (combined >= 8.5 && s.sscTotal >= 4.0 && s.hscTotal >= 3.5);
-      const reason = ok
-        ? 'Meets CU A-unit combined minima (science group).'
-        : 'CU A-unit typically expects combined ≥8.5 and SSC ≥4.0, HSC ≥3.5.';
-      return {eligible: ok, reason};
-    }
-  },
-  {
-    key: 'sust_a',
-    display: 'SUST A unit (Shahjalal University of Science & Technology)',
-    shortDesc: 'SUST: combined SSC+HSC ≥7.0 (varies by unit) and per-exam minima.',
-    source: 'SUST prospectus / admission pages',
-    rule: s => {
-      const combined = s.sscTotal + s.hscTotal;
-      const ok = (combined >= 7.0 && s.sscTotal >= 3.0 && s.hscTotal >= 3.0);
-      const reason = ok
-        ? 'Matches commonly-published SUST minima (combined ≥7.0).'
-        : 'SUST criteria vary by unit; many require combined ≥7.0 with minima in each exam.';
+        ? 'Meets subject-wise minima (Math/Physics/Chemistry/English ≥4.00) and sum ≥18.00.'
+        : 'RUET requires each of Math/Physics/Chemistry/English ≥4.00 and combined sum ≥18.00; subject minima not satisfied.';
       return {eligible: ok, reason};
     }
   },
   {
     key: 'butex',
     display: 'BUTEX (Bangladesh University of Textiles)',
-    shortDesc: 'BUTEX: SSC ≥4.0, HSC ≥4.5 and high subject-sum (approx. Math+Phy+Chem+English ≥18.5).',
-    source: 'BUTEX admission circular / prospectus',
+    shortDesc: 'BUTEX requires HSC (or Equivalent) GPA 5.00 (in some documents) or at least high subject-sum (Math+Phy+Chem+Eng) ~20.00; we apply HSC total ≥5.00 as stricter rule.',
+    source: 'BUTEX undergraduate programs page – HSC GPA not less than 5.00 & subject-sum ≥20.00. :contentReference[oaicite:5]{index=5}',
     rule: s => {
-      const sum4 = s.mathGpa + s.phyGpa + s.chemGpa + s.engGpa;
-      const ok = (s.sscTotal >= 4.0 && s.hscTotal >= 4.5 && sum4 >= 18.5);
+      const sum4 = (s.mathGpa + s.phyGpa + s.chemGpa + s.engGpa);
+      const ok = (s.hscTotal >= 5.00 && sum4 >= 20.00 && s.sscGpa >= 4.00 ?? true);
       const reason = ok
-        ? 'Meets BUTEX minima: SSC ≥4.0, HSC ≥4.5 and combined subject-sum ≥18.5.'
-        : 'BUTEX commonly requires SSC ≥4.0, HSC ≥4.5 and subject-sum ≈18.5.';
+        ? 'Meets strict criteria: HSC total ≥5.00 and subject-sum (Math+Phy+Chem+Eng) ≥20.00.'
+        : 'BUTEX’s stricter criteria: HSC total ≥5.00 and subject-sum (Math+Phy+Chem+Eng) ≥20.00; condition(s) not met.';
       return {eligible: ok, reason};
     }
   },
   {
     key: 'iut',
     display: 'IUT (Islamic University of Technology)',
-    shortDesc: 'IUT: requires strong SSC & HSC (combined ≥8.0) and subject GPAs strong; check official circular.',
-    source: 'IUT entry requirements (IUTOIC page)',
+    shortDesc: 'Requires strong HSC GPA (commonly total ≥5.00) though exact subject-wise 5.00 not confirmed; we apply HSC total ≥5.00 as strict proxy.',
+    source: 'General admission guide – subject minima not fully available.',
     rule: s => {
-      const combined = s.sscTotal + s.hscTotal;
-      const ok = (combined >= 8.0 && s.sscTotal >= 4.0 && s.hscTotal >= 4.0);
+      const ok = (s.hscTotal >= 5.00 && s.sscGpa >= 4.00 ?? true);
       const reason = ok
-        ? 'Meets common IUT minima (combined ≥8.0 and strong SSC/HSC).'
-        : 'IUT expects strong SSC & HSC GPAs; subject minima may apply by department.';
+        ? 'Meets HSC total ≥5.00 (proxy for IUT requirement).'
+        : 'IUT likely expects HSC total GPA 5.00 or equivalent; check official circular.';
       return {eligible: ok, reason};
     }
   },
   {
     key: 'mist',
     display: 'MIST (Military Institute of Science & Technology)',
-    shortDesc: 'MIST: SSC ≥4.0 and subject-sum (Math+Phy+Chem+English) ≈18 or more (HSC subject-wise).',
-    source: 'MIST admission notice / prospectus',
+    shortDesc: 'Requires strong subject‐sum (Math+Phy+Chem+Eng) ≈18.0 and SSC ≥4.0; some sources suggest HSC GPA 5.0 is strongly preferred.',
+    source: 'MIST admission criteria guide – subject–sum ~18.0. :contentReference[oaicite:6]{index=6}',
     rule: s => {
-      const sum4 = s.mathGpa + s.phyGpa + s.chemGpa + s.engGpa;
-      const ok = (s.sscTotal >= 4.0 && sum4 >= 18.0);
+      const sum4 = (s.mathGpa + s.phyGpa + s.chemGpa + s.engGpa);
+      const ok = (s.sscGpa >= 4.00 ?? true) && (sum4 >= 18.00) && (s.hscTotal >= 5.00);
       const reason = ok
-        ? 'Meets MIST common minima: SSC ≥4.0 and subject-sum ≈18.'
-        : 'MIST usually expects SSC ≥4.0 and subject-sum ≈18; check official circular.';
+        ? 'Meets SSC ≥4.00, subject-sum ≥18.00 and HSC total ≥5.00.'
+        : 'MIST commonly expects SSC ≥4.00, subject-sum ≥18.0 and HSC total GPA 5.00; check circular.';
+      return {eligible: ok, reason};
+    }
+  },
+  {
+    key: 'du_all',
+    display: 'DU (University of Dhaka) — Science unit / all units',
+    shortDesc: 'Combined SSC+HSC ≥8.0 and SSC/HSC each ≥3.5; subject minima may apply but HSC total ≥5.0 not confirmed universally.',
+    source: 'University of Dhaka eligibility notes.',
+    rule: s => {
+      const combined = (s.sscGpa + s.hscTotal);
+      const ok = (combined >= 8.0 && s.sscGpa >= 3.50 && s.hscTotal >= 3.50);
+      const reason = ok
+        ? 'Combined SSC+HSC ≥8.0 and SSC/HSC each ≥3.50.'
+        : 'DU Science unit expectation: combined ≥8.0 and SSC/HSC each ≥3.50; subject minima may apply.';
+      return {eligible: ok, reason};
+    }
+  },
+  {
+    key: 'ju_a',
+    display: 'JU A unit (Jahangirnagar University)',
+    shortDesc: 'Combined SSC+HSC ≥8.5 and SSC/HSC each ≥4.0; HSC total ≥5.0 not universally documented.',
+    source: 'JU admission circular (A unit).',
+    rule: s => {
+      const combined = (s.sscGpa + s.hscTotal);
+      const ok = (combined >= 8.5 && s.sscGpa >= 4.0 && s.hscTotal >= 4.0);
+      const reason = ok
+        ? 'Meets JU A-unit combined GPA and per-exam minima.'
+        : 'JU A-unit usually expects combined ≥8.5 and SSC/HSC each ≥4.0; check circular.';
+      return {eligible: ok, reason};
+    }
+  },
+  {
+    key: 'ju_d',
+    display: 'JU D unit (Jahangirnagar University)',
+    shortDesc: 'Combined SSC+HSC ≥9.0 and SSC/HSC each ≥4.0; subject-wise HSC total ≥5.0 not documented.',
+    source: 'JU admission circular (D unit).',
+    rule: s => {
+      const combined = (s.sscGpa + s.hscTotal);
+      const ok = (combined >= 9.0 && s.sscGpa >= 4.0 && s.hscTotal >= 4.0);
+      const reason = ok
+        ? 'Meets JU D-unit combined GPA and per-exam minima.'
+        : 'JU D-unit often expects combined ≥9.0 and SSC/HSC each ≥4.0; check circular.';
+      return {eligible: ok, reason};
+    }
+  },
+  {
+    key: 'ru_c',
+    display: 'RU C unit (University of Rajshahi)',
+    shortDesc: 'Combined SSC+HSC ≈8.0 and HSC minima ≥3.5; stricter HSC total ≥5.0 not documented.',
+    source: 'RU prospectus / admission circular.',
+    rule: s => {
+      const combined = (s.sscGpa + s.hscTotal);
+      const ok = (combined >= 8.0 && s.hscTotal >= 3.50);
+      const reason = ok
+        ? 'Meets typical RU C-unit combined minima.'
+        : 'RU C-unit common criteria: combined ≥8.0 and HSC ≥3.5; check circular.';
       return {eligible: ok, reason};
     }
   }
 ];
 
 const sourcesList = [
-  {key:'buet', title:'BUET admission checklist & subject-wise minima article', url:'https://careerpaths.com.bd/buet-admission-test'},
-  {key:'ruet', title:'RUET prospectus / admission notice', url:'https://admission.ruet.ac.bd/notices/prospectus'},
-  {key:'cuet', title:'CUET admission circular (Math+Phy+Chem sum ≥14 & English min)', url:'https://admissionnotice.com/en/cuet-admission-circular-2025-admissioncuet-ac-bd/'},
-  {key:'du', title:'University of Dhaka undergraduate eligibility notes', url:'https://www.du.ac.bd/undergrad/BOT'},
-  {key:'butex', title:'BUTEX admission circular (SSC ≥4.0, HSC ≥4.5 & subject-sum ≈18.5)', url:'https://butex.edu.bd/Admission/'},
-  {key:'mist', title:'MIST admission notice (SSC ≥4.0 & subject-sum criteria)', url:'https://mist.ac.bd'}
+  {key:'buet', title:'BUET admission guideline (HSC GPA 5.00 in Maths/Physics/Chemistry)', url:'https://careerpaths.com.bd/buet-admission-test/'},
+  {key:'buet2', title:'BUET admission circular summary – HSC GPA 5.00', url:'https://gstadmission.com/buet-admission-circular/'},
+  {key:'butex', title:'BUTEX undergraduate programs page – HSC GPA 5.00 & subject-sum ≥20.00', url:'https://www.butex.edu.bd/undergraduate-programs/'},
+  {key:'ruet', title:'RUET admission prospectus – subject‐wise ≥4.00 & sum ≥18.00', url:'https://admission.ruet.ac.bd/notices/prospectus/Admission%20Test%20Prospectus%20%282024-2025%29%20RUET.pdf'},
+  {key:'mist', title:'MIST admission criteria – subject-sum ~18.0 etc.', url:'https://en.wikipedia.org/wiki/Military_Institute_of_Science_&_Technology'},
+  {key:'cuet', title:'CUET admission prospectus (Math+Physics+Chem sum ≥14 & English min)', url:'https://cuet.ac.bd/notice/Admission%20prospectus%20English%202023-2024_updated.pdf'}
 ];
 
 function renderSources(){
@@ -367,7 +339,7 @@ function renderSources(){
 function readInputs(){
   function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v)?0:v;}
   return {
-    sscTotal: num('sscGpa'),
+    sscGpa: num('sscGpa'),
     hscTotal: num('hscTotal'),
     mathGpa: num('mathGpa'),
     phyGpa: num('phyGpa'),
@@ -379,7 +351,7 @@ function readInputs(){
 
 function runChecks(){
   const s = readInputs();
-  if(s.sscTotal <= 0 || s.hscTotal <= 0){
+  if(s.sscGpa <= 0 || s.hscTotal <= 0){
     alert('Please enter your SSC and HSC total GPAs.');
     return;
   }
@@ -409,7 +381,7 @@ function runChecks(){
   }
 
   if(notEligible.length === 0){
-    nBox.innerHTML = `<div class="small" style="color:var(--muted)">Congratulations — you meet common minima for all listed universities. Still check subject-wise minima, year-of-pass rules, quotas and admission test requirements.</div>`;
+    nBox.innerHTML = `<div class="small" style="color:var(--muted)">Congratulations — you meet the common minima for all listed universities. Still check subject-wise minima, year-of-pass rules, quotas and admission test requirements.</div>`;
   } else {
     notEligible.forEach(it=>{
       const div = document.createElement('div');
@@ -421,7 +393,7 @@ function runChecks(){
 
   const lastNote = document.getElementById('lastNote');
   lastNote.style.display = 'block';
-  lastNote.innerText = `Displayed results use publicly-available admission minima. Subject-wise GPA requirements (e.g., Maths/Physics/Chemistry/English) have been included when documented, but department-level or year-specific differences may apply — check official circulars.`;
+  lastNote.innerText = `Displayed results use publicly-available admission minima. Stricter subject-wise GPA requirements (e.g., GPA 5.00) have been incorporated where documented, but department-level or year-specific differences may apply — check official circulars.`;
 }
 
 document.getElementById('checkBtn').addEventListener('click', runChecks);
